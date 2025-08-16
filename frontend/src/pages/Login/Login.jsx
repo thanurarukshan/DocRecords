@@ -1,10 +1,115 @@
-import React from 'react'
-import './Login.css'
+import React, { useState } from 'react';
+import './Login.css';
 
 function Login() {
+  const [isSignup, setIsSignup] = useState(false);
+  const [role, setRole] = useState('patient'); // default role
+  const [formData, setFormData] = useState({
+    fullName: '',
+    age: '',
+    gender: '',
+    birthday: '',
+    mobile: '',
+    email: '',
+    password: '',
+    mbbsReg: '', // only for doctors
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (isSignup) {
+      console.log("Sign Up Data:", { ...formData, role });
+      // TODO: call signup API
+    } else {
+      console.log("Login Data:", { email: formData.email, password: formData.password, role });
+      // TODO: call login API
+    }
+  };
+
   return (
-    <div>Login</div>
-  )
+    <div className="login-container">
+      <h2>{isSignup ? "Sign Up" : "Sign In"}</h2>
+      <form className="login-form" onSubmit={handleSubmit}>
+        
+        {isSignup && (
+          <>
+            <label>Full Name</label>
+            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+
+            <label>Age</label>
+            <input type="number" name="age" value={formData.age} onChange={handleChange} required min="0" />
+
+            <label>Gender</label>
+            <select name="gender" value={formData.gender} onChange={handleChange} required>
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+
+            <label>Birthday</label>
+            <input type="date" name="birthday" value={formData.birthday} onChange={handleChange} required />
+
+            <label>Mobile No</label>
+            <input type="tel" name="mobile" value={formData.mobile} onChange={handleChange} required />
+          </>
+        )}
+
+        <label>Email</label>
+        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+
+        <label>Password</label>
+        <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+
+        <div className="role-select">
+          <label>
+            <input 
+              type="radio" 
+              value="patient" 
+              checked={role === "patient"} 
+              onChange={(e) => setRole(e.target.value)} 
+            />
+            Patient
+          </label>
+          <label>
+            <input 
+              type="radio" 
+              value="doctor" 
+              checked={role === "doctor"} 
+              onChange={(e) => setRole(e.target.value)} 
+            />
+            Doctor
+          </label>
+        </div>
+
+        {isSignup && role === 'doctor' && (
+          <>
+            <label>MBBS Registration No</label>
+            <input type="text" name="mbbsReg" value={formData.mbbsReg} onChange={handleChange} required />
+          </>
+        )}
+
+        <button type="submit" className="btn-primary">
+          {isSignup ? "Sign Up" : "Sign In"}
+        </button>
+      </form>
+
+      <p className="toggle-text">
+        {isSignup ? "Already have an account?" : "Not a user?"}{" "}
+        <button 
+          type="button" 
+          className="toggle-btn" 
+          onClick={() => setIsSignup(!isSignup)}
+        >
+          {isSignup ? "Sign In" : "Sign Up"}
+        </button>
+      </p>
+    </div>
+  );
 }
 
-export default Login
+export default Login;
