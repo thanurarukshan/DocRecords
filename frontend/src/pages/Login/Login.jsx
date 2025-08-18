@@ -19,16 +19,58 @@ function Login() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (isSignup) {
+  //     console.log("Sign Up Data:", { ...formData, role });
+  //     // TODO: call signup API
+  //   } else {
+  //     console.log("Login Data:", { email: formData.email, password: formData.password, role });
+  //     // TODO: call login API
+  //   }
+  // };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
     if (isSignup) {
-      console.log("Sign Up Data:", { ...formData, role });
-      // TODO: call signup API
+      const response = await fetch("http://localhost:4000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, role }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Signup successful! Please login.");
+        setIsSignup(false);
+      } else {
+        alert(data.message || "Signup failed!");
+      }
     } else {
-      console.log("Login Data:", { email: formData.email, password: formData.password, role });
-      // TODO: call login API
+      const response = await fetch("http://localhost:4000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, password: formData.password, role }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("token", data.token); // store JWT
+        alert("Login successful!");
+        // navigate user to dashboard (if using react-router)
+        // navigate("/dashboard");
+      } else {
+        alert(data.message || "Login failed!");
+      }
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Server error!");
+  }
+};
+
 
   return (
     <div className="login-container">
