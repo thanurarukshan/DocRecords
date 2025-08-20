@@ -10,18 +10,38 @@ function PatientDashboard() {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    if (user) {
-      setProfile(user); // set patient profile from login data
-    }
+  if (user) {
+    setProfile(user); // set patient profile from login data
 
-    // TODO: fetch medical history from API
-    // For now, using dummy data
-    const dummyMedicalHistory = [
-      { id: 1, doctor: 'Dr. Smith', date: '2025-08-01', prescription: 'Paracetamol 500mg, 3 times a day' },
-      { id: 2, doctor: 'Dr. Jane', date: '2025-08-10', prescription: 'Amoxicillin 250mg, 2 times a day' },
-    ];
-    setHistory(dummyMedicalHistory);
-  }, [user]);
+    // Fetch medical history from prescription-service via API Gateway
+    const fetchMedicalHistory = async () => {
+      try {
+        const token = localStorage.getItem("token"); // send JWT for auth if needed
+        const response = await fetch(
+          `http://localhost:4000/prescription/medical-history/${user.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`, // optional
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (response.ok) {
+          setHistory(data.medicalHistory || []); // <-- use data.medicalHistory
+        } else {
+          console.error("Failed to fetch medical history:", data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching medical history:", err);
+      }
+    };
+
+    fetchMedicalHistory();
+  }
+}, [user]);
 
   return (
     <div className="patient-dashboard">
@@ -50,13 +70,19 @@ function PatientDashboard() {
             </tr>
           </thead>
           <tbody>
-            {history.map(record => (
-              <tr key={record.id}>
-                <td>{record.date}</td>
-                <td>{record.doctor}</td>
-                <td>{record.prescription}</td>
+            {history.length > 0 ? (
+              history.map(record => (
+                <tr key={record.consultation_id}>
+                  <td>{record.visit_date}</td>
+                  <td>{record.doctor_name}</td>
+                  <td>{record.prescription}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3">No medical history available.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </section>
