@@ -35,7 +35,7 @@ app.use(
 app.use(
   "/patient",
   createProxyMiddleware({
-    target: "http://localhost:5002",  // patient-service
+    target: "http://localhost:5000",  // patient-service (corrected)
     changeOrigin: true,
     pathRewrite: { "^/patient": "" }
   })

@@ -2,25 +2,6 @@ import React, { useState, useEffect } from 'react';
 import './DoctorDashboard.css';
 import { useLocation } from "react-router-dom";
 
-// Dummy patients data (can be replaced with API calls)
-const dummyPatients = {
-  101: {
-    fullName: 'John Doe',
-    age: 30,
-    gender: 'Male',
-    medicalHistory: [
-      { id: 1, date: '2025-08-01', prescription: 'Paracetamol 500mg, 3 times a day' },
-      { id: 2, date: '2025-08-10', prescription: 'Amoxicillin 250mg, 2 times a day' },
-    ],
-  },
-  102: {
-    fullName: 'Jane Smith',
-    age: 25,
-    gender: 'Female',
-    medicalHistory: [],
-  },
-};
-
 function DoctorDashboard() {
   const location = useLocation();
   const { user } = location.state || {}; // user object passed from Login page
@@ -29,6 +10,7 @@ function DoctorDashboard() {
   const [patientId, setPatientId] = useState('');
   const [patient, setPatient] = useState(null);
   const [newPrescription, setNewPrescription] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -36,27 +18,60 @@ function DoctorDashboard() {
     }
   }, [user]);
 
-  const handleSearch = (e) => {
+  // 🔍 Fetch patient info by ID
+  const handleSearch = async (e) => {
     e.preventDefault();
-    const foundPatient = dummyPatients[patientId];
-    if (foundPatient) {
-      setPatient(foundPatient);
-    } else {
+    if (!patientId) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:4000/patient/patients/${patientId}`);
+      if (!response.ok) {
+        throw new Error("Patient not found");
+      }
+      const data = await response.json();
+      setPatient(data);
+    } catch (error) {
+      console.error("Error fetching patient:", error);
       setPatient(null);
       alert('Patient not found!');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddPrescription = (e) => {
+  // 💊 Add prescription
+  const handleAddPrescription = async (e) => {
     e.preventDefault();
     if (!newPrescription || !patient) return;
-    const updatedHistory = [
-      ...patient.medicalHistory,
-      { id: Date.now(), date: new Date().toISOString().split('T')[0], prescription: newPrescription },
-    ];
-    setPatient({ ...patient, medicalHistory: updatedHistory });
-    setNewPrescription('');
-    // TODO: call API to save prescription in backend
+
+    try {
+      const response = await fetch(`http://localhost:4000/patient/patients/${patientId}/prescriptions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prescription: newPrescription,
+          doctor_name: doctorProfile.fullName || "Unknown Doctor",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save prescription");
+      }
+
+      const updatedHistory = await response.json();
+
+      // Update patient with new history
+      setPatient((prev) => ({
+        ...prev,
+        medicalHistory: updatedHistory.medicalHistory,
+      }));
+
+      setNewPrescription('');
+    } catch (error) {
+      console.error("Error adding prescription:", error);
+      alert("Failed to add prescription");
+    }
   };
 
   return (
@@ -86,34 +101,40 @@ function DoctorDashboard() {
             onChange={(e) => setPatientId(e.target.value)}
             required
           />
-          <button type="submit" className="btn-primary">Search</button>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "Searching..." : "Search"}
+          </button>
         </form>
       </section>
 
       {patient && (
         <section className="patient-section">
           <h3>Patient Info</h3>
-          <p><strong>Full Name:</strong> {patient.fullName}</p>
+          <p><strong>Full Name:</strong> {patient.full_name}</p>
           <p><strong>Age:</strong> {patient.age}</p>
           <p><strong>Gender:</strong> {patient.gender}</p>
 
           <h3>Medical History</h3>
-          <table className="history-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Prescription</th>
-              </tr>
-            </thead>
-            <tbody>
-              {patient.medicalHistory.map(record => (
-                <tr key={record.id}>
-                  <td>{record.date}</td>
-                  <td>{record.prescription}</td>
+          {patient.medicalHistory?.length > 0 ? (
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Prescription</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {patient.medicalHistory.map((record, index) => (
+                  <tr key={index}>
+                    <td>{new Date(record.date).toLocaleDateString()}</td>
+                    <td>{record.prescription}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No medical history available.</p>
+          )}
 
           <h3>Add Prescription</h3>
           <form onSubmit={handleAddPrescription}>
