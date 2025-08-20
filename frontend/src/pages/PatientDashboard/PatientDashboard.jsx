@@ -1,46 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import './PatientDashboard.css';
-
-// Dummy data (replace with API calls later)
-const dummyProfile = {
-  fullName: 'John Doe',
-  age: 30,
-  gender: 'Male',
-  birthday: '1993-08-16',
-  mobile: '0771234567',
-  email: 'john@example.com',
-};
-
-const dummyMedicalHistory = [
-  { id: 1, doctor: 'Dr. Smith', date: '2025-08-01', prescription: 'Paracetamol 500mg, 3 times a day' },
-  { id: 2, doctor: 'Dr. Jane', date: '2025-08-10', prescription: 'Amoxicillin 250mg, 2 times a day' },
-];
+import { useLocation } from "react-router-dom";
 
 function PatientDashboard() {
+  const location = useLocation();
+  const { user } = location.state || {}; // user object passed from login page
+
   const [profile, setProfile] = useState({});
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    // TODO: fetch patient profile from API
-    setProfile(dummyProfile);
+    if (user) {
+      setProfile(user); // set patient profile from login data
+    }
 
     // TODO: fetch medical history from API
+    // For now, using dummy data
+    const dummyMedicalHistory = [
+      { id: 1, doctor: 'Dr. Smith', date: '2025-08-01', prescription: 'Paracetamol 500mg, 3 times a day' },
+      { id: 2, doctor: 'Dr. Jane', date: '2025-08-10', prescription: 'Amoxicillin 250mg, 2 times a day' },
+    ];
     setHistory(dummyMedicalHistory);
-  }, []);
+  }, [user]);
 
   return (
     <div className="patient-dashboard">
-      <h2>Welcome, {profile.fullName}</h2>
+      <h2>Welcome, {profile.fullName || "Patient"}</h2>
 
       <section className="profile-section">
         <h3>Your Profile</h3>
         <div className="profile-info">
-          <p><strong>Full Name:</strong> {profile.fullName}</p>
-          <p><strong>Age:</strong> {profile.age}</p>
-          <p><strong>Gender:</strong> {profile.gender}</p>
-          <p><strong>Birthday:</strong> {profile.birthday}</p>
-          <p><strong>Mobile:</strong> {profile.mobile}</p>
-          <p><strong>Email:</strong> {profile.email}</p>
+          <p><strong>Full Name:</strong> {profile.fullName || "-"}</p>
+          <p><strong>Age:</strong> {profile.age || "-"}</p>
+          <p><strong>Gender:</strong> {profile.gender || "-"}</p>
+          <p><strong>Birthday:</strong> {profile.birthday || "-"}</p>
+          <p><strong>Mobile:</strong> {profile.mobile || "-"}</p>
+          <p><strong>Email:</strong> {profile.email || "-"}</p>
         </div>
       </section>
 

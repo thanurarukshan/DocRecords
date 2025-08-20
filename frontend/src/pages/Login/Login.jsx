@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Login.css';
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [isSignup, setIsSignup] = useState(false);
@@ -15,68 +16,65 @@ function Login() {
     mbbsReg: '', // only for doctors
   });
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (isSignup) {
-  //     console.log("Sign Up Data:", { ...formData, role });
-  //     // TODO: call signup API
-  //   } else {
-  //     console.log("Login Data:", { email: formData.email, password: formData.password, role });
-  //     // TODO: call login API
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    if (isSignup) {
-      const response = await fetch("http://localhost:4000/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, role }),
-      });
+    try {
+      if (isSignup) {
+        const payload = { ...formData, role };
+        if (role !== "doctor") delete payload.mbbsReg;
 
-      const data = await response.json();
-      if (response.ok) {
-        alert("Signup successful! Please login.");
-        setIsSignup(false);
+        const response = await fetch("http://localhost:4000/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          alert("Signup successful! Please login.");
+          setIsSignup(false);
+        } else {
+          alert(data.message || "Signup failed!");
+        }
       } else {
-        alert(data.message || "Signup failed!");
-      }
-    } else {
-      const response = await fetch("http://localhost:4000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email, password: formData.password, role }),
-      });
+        const response = await fetch("http://localhost:4000/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email, password: formData.password, role }),
+        });
 
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem("token", data.token); // store JWT
-        alert("Login successful!");
-        // navigate user to dashboard (if using react-router)
-        // navigate("/dashboard");
-      } else {
-        alert(data.message || "Login failed!");
+        const data = await response.json();
+        if (response.ok) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("role", role);
+
+          // Redirect based on role and send user info via state
+          if (role === "doctor") {
+            navigate("/doctor", { state: { user: data.user } });
+          } else {
+            navigate("/patient", { state: { user: data.user } });
+          }
+        } else {
+          alert(data.message || "Login failed!");
+        }
       }
+    } catch (err) {
+      console.error(err);
+      alert("Server error!");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Server error!");
-  }
-};
-
+  };
 
   return (
     <div className="login-container">
       <h2>{isSignup ? "Sign Up" : "Sign In"}</h2>
       <form className="login-form" onSubmit={handleSubmit}>
-        
         {isSignup && (
           <>
             <label>Full Name</label>

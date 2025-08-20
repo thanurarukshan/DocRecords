@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './DoctorDashboard.css';
+import { useLocation } from "react-router-dom";
 
-// Dummy doctor profile
-const dummyDoctorProfile = {
-  fullName: 'Dr. John Smith',
-  age: 40,
-  gender: 'Male',
-  birthday: '1985-05-15',
-  mobile: '0779876543',
-  email: 'dr.john@example.com',
-  mbbsReg: 'MBBS12345',
-};
-
-// Dummy patient data
+// Dummy patients data (can be replaced with API calls)
 const dummyPatients = {
   101: {
     fullName: 'John Doe',
@@ -32,15 +22,19 @@ const dummyPatients = {
 };
 
 function DoctorDashboard() {
+  const location = useLocation();
+  const { user } = location.state || {}; // user object passed from Login page
+
   const [doctorProfile, setDoctorProfile] = useState({});
   const [patientId, setPatientId] = useState('');
   const [patient, setPatient] = useState(null);
   const [newPrescription, setNewPrescription] = useState('');
 
   useEffect(() => {
-    // TODO: fetch doctor profile from API
-    setDoctorProfile(dummyDoctorProfile);
-  }, []);
+    if (user) {
+      setDoctorProfile(user); // set doctor profile from login data
+    }
+  }, [user]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -55,30 +49,30 @@ function DoctorDashboard() {
 
   const handleAddPrescription = (e) => {
     e.preventDefault();
-    if (!newPrescription) return;
+    if (!newPrescription || !patient) return;
     const updatedHistory = [
       ...patient.medicalHistory,
       { id: Date.now(), date: new Date().toISOString().split('T')[0], prescription: newPrescription },
     ];
     setPatient({ ...patient, medicalHistory: updatedHistory });
     setNewPrescription('');
-    // TODO: call API to save prescription
+    // TODO: call API to save prescription in backend
   };
 
   return (
     <div className="doctor-dashboard">
-      <h2>Welcome, {doctorProfile.fullName}</h2>
+      <h2>Welcome, {doctorProfile.fullName || "Doctor"}</h2>
 
       <section className="profile-section">
         <h3>Your Profile</h3>
         <div className="profile-info">
-          <p><strong>Full Name:</strong> {doctorProfile.fullName}</p>
-          <p><strong>Age:</strong> {doctorProfile.age}</p>
-          <p><strong>Gender:</strong> {doctorProfile.gender}</p>
-          <p><strong>Birthday:</strong> {doctorProfile.birthday}</p>
-          <p><strong>Mobile:</strong> {doctorProfile.mobile}</p>
-          <p><strong>Email:</strong> {doctorProfile.email}</p>
-          <p><strong>MBBS Reg No:</strong> {doctorProfile.mbbsReg}</p>
+          <p><strong>Full Name:</strong> {doctorProfile.fullName || "-"}</p>
+          <p><strong>Age:</strong> {doctorProfile.age || "-"}</p>
+          <p><strong>Gender:</strong> {doctorProfile.gender || "-"}</p>
+          <p><strong>Birthday:</strong> {doctorProfile.birthday || "-"}</p>
+          <p><strong>Mobile:</strong> {doctorProfile.mobile || "-"}</p>
+          <p><strong>Email:</strong> {doctorProfile.email || "-"}</p>
+          <p><strong>MBBS Reg No:</strong> {doctorProfile.mbbsReg || "-"}</p>
         </div>
       </section>
 

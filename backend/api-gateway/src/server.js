@@ -61,6 +61,16 @@ app.use(
   })
 );
 
+// ---------- PRESCRIPTION SERVICE ----------
+app.use(
+  "/prescription",
+  createProxyMiddleware({
+    target: "http://localhost:5004",  // prescription-service
+    changeOrigin: true,
+    pathRewrite: { "^/prescription": "" }  // /prescription/medical-history/:id → /medical-history/:id
+  })
+);
+
 app.listen(4000, () => {
   console.log("API Gateway running on port 4000");
 });
