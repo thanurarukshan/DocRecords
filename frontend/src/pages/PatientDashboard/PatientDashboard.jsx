@@ -1,3 +1,4 @@
+// PatientDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import './PatientDashboard.css';
 import { useLocation } from "react-router-dom";
@@ -10,38 +11,38 @@ function PatientDashboard() {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-  if (user) {
-    setProfile(user); // set patient profile from login data
+    if (user) {
+      setProfile(user); // set patient profile from login data
 
-    // Fetch medical history from prescription-service via API Gateway
-    const fetchMedicalHistory = async () => {
-      try {
-        const token = localStorage.getItem("token"); // send JWT for auth if needed
-        const response = await fetch(
-          `http://localhost:4000/prescription/medical-history/${user.id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`, // optional
-            },
+      // Fetch medical history from prescription-service via API Gateway
+      const fetchMedicalHistory = async () => {
+        try {
+          const token = localStorage.getItem("token"); // send JWT for auth if needed
+          const response = await fetch(
+            `http://localhost:4000/prescription/medical-history/${user.id}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`, // optional
+              },
+            }
+          );
+
+          const data = await response.json();
+          if (response.ok) {
+            setHistory(data.medicalHistory || []); // use medicalHistory array
+          } else {
+            console.error("Failed to fetch medical history:", data.message);
           }
-        );
-
-        const data = await response.json();
-        if (response.ok) {
-          setHistory(data.medicalHistory || []); // <-- use data.medicalHistory
-        } else {
-          console.error("Failed to fetch medical history:", data.message);
+        } catch (err) {
+          console.error("Error fetching medical history:", err);
         }
-      } catch (err) {
-        console.error("Error fetching medical history:", err);
-      }
-    };
+      };
 
-    fetchMedicalHistory();
-  }
-}, [user]);
+      fetchMedicalHistory();
+    }
+  }, [user]);
 
   return (
     <div className="patient-dashboard">
@@ -73,8 +74,9 @@ function PatientDashboard() {
             {history.length > 0 ? (
               history.map(record => (
                 <tr key={record.consultation_id}>
-                  <td>{record.visit_date}</td>
-                  <td>{record.doctor_name}</td>
+                  {/* Format date nicely */}
+                  <td>{new Date(record.visit_date).toLocaleDateString()}</td>
+                  <td>{record.doctor_name || record.doctor_id}</td>
                   <td>{record.prescription}</td>
                 </tr>
               ))
