@@ -19,19 +19,29 @@ function DoctorDashboard() {
     }
   }, [user]);
 
-  // 🔍 Fetch patient info by ID
+  // 🔍 Fetch patient info AND medical history by ID
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!patientId) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:4000/patient/patients/${patientId}`);
-      if (!response.ok) {
+      // Fetch patient profile
+      const patientRes = await fetch(`http://localhost:4000/patient/patients/${patientId}`);
+      if (!patientRes.ok) {
         throw new Error("Patient not found");
       }
-      const data = await response.json();
-      setPatient(data);
+      const patientData = await patientRes.json();
+
+      // Fetch patient's medical history from prescription-service via API Gateway
+      const historyRes = await fetch(`http://localhost:4000/prescription/medical-history/${patientId}`);
+      let medicalHistory = [];
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+        medicalHistory = historyData.medicalHistory || [];
+      }
+
+      setPatient({ ...patientData, medicalHistory });
     } catch (error) {
       console.error("Error fetching patient:", error);
       setPatient(null);
@@ -52,7 +62,7 @@ function DoctorDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           patient_id: patient.user_id,       // from search result
-          doctor_id: doctorProfile.id,       // corrected field
+          doctor_id: doctorProfile.id,       // from login
           prescription: newPrescription,
         }),
       });
@@ -63,7 +73,7 @@ function DoctorDashboard() {
 
       const savedConsultation = await response.json();
 
-      // Update UI with the full medicalHistory returned by backend
+      // Update UI with the latest medicalHistory from backend
       setPatient((prev) => ({
         ...prev,
         medicalHistory: savedConsultation.medicalHistory,

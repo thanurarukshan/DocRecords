@@ -18,22 +18,18 @@ app.get("/", (req, res) => {
 
 // ----------------- GET MEDICAL HISTORY -----------------
 // Example: GET /medical-history/5 → all prescriptions for patient_id = 5
+// GET MEDICAL HISTORY
 app.get("/medical-history/:patientId", async (req, res) => {
   const { patientId } = req.params;
 
   try {
     const [rows] = await db.query(
-      `SELECT c.consultation_id, c.visit_date, c.prescription, d.full_name AS doctor_name
-       FROM consultations c
-       LEFT JOIN users d ON c.doctor_id = d.user_id
-       WHERE c.patient_id = ? 
-       ORDER BY c.visit_date DESC`,
+      `SELECT consultation_id, visit_date, prescription, doctor_id
+       FROM consultations
+       WHERE patient_id = ?
+       ORDER BY visit_date DESC`,
       [patientId]
     );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ medicalHistory: [] });
-    }
 
     res.json({ medicalHistory: rows });
   } catch (error) {
@@ -41,6 +37,7 @@ app.get("/medical-history/:patientId", async (req, res) => {
     res.status(500).json({ error: "Database query failed" });
   }
 });
+
 
 // ----------------- ADD NEW PRESCRIPTION -----------------
 // Example POST body:
