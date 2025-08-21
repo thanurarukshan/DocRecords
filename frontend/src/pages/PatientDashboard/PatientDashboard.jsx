@@ -51,6 +51,7 @@ function PatientDashboard() {
       <section className="profile-section">
         <h3>Your Profile</h3>
         <div className="profile-info">
+          <p><strong>User ID:</strong> {profile.id || "-"}</p>
           <p><strong>Full Name:</strong> {profile.fullName || "-"}</p>
           <p><strong>Age:</strong> {profile.age || "-"}</p>
           <p><strong>Gender:</strong> {profile.gender || "-"}</p>
@@ -74,7 +75,6 @@ function PatientDashboard() {
             {history.length > 0 ? (
               history.map(record => (
                 <tr key={record.consultation_id}>
-                  {/* Format date nicely */}
                   <td>{new Date(record.visit_date).toLocaleDateString()}</td>
                   <td>{record.doctor_name || record.doctor_id}</td>
                   <td>{record.prescription}</td>

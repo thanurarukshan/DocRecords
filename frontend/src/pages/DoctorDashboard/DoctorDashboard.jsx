@@ -93,6 +93,7 @@ function DoctorDashboard() {
       <section className="profile-section">
         <h3>Your Profile</h3>
         <div className="profile-info">
+          <p><strong>User ID:</strong> {doctorProfile.id || "-"}</p>
           <p><strong>Full Name:</strong> {doctorProfile.fullName || "-"}</p>
           <p><strong>Age:</strong> {doctorProfile.age || "-"}</p>
           <p><strong>Gender:</strong> {doctorProfile.gender || "-"}</p>
@@ -100,7 +101,6 @@ function DoctorDashboard() {
           <p><strong>Mobile:</strong> {doctorProfile.mobile || "-"}</p>
           <p><strong>Email:</strong> {doctorProfile.email || "-"}</p>
           <p><strong>MBBS Reg No:</strong> {doctorProfile.mbbsReg || "-"}</p>
-          <p><strong>User ID:</strong> {doctorProfile.id || "-"}</p>
         </div>
       </section>
 

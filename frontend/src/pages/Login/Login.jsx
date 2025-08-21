@@ -55,10 +55,20 @@ function Login() {
           localStorage.setItem("token", data.token);
           localStorage.setItem("role", role);
 
-          // Redirect based on role and send user info via state
+          // Check MBBS registration to prevent dashboard misuse
+          const isDoctor = !!data.user.mbbsReg; // true if mbbsReg exists
+
           if (role === "doctor") {
+            if (!isDoctor) {
+              alert("You are not registered as a doctor. Cannot access Doctor Dashboard.");
+              return;
+            }
             navigate("/doctor", { state: { user: data.user } });
           } else {
+            if (isDoctor) {
+              alert("Doctors cannot access Patient Dashboard.");
+              return;
+            }
             navigate("/patient", { state: { user: data.user } });
           }
         } else {
