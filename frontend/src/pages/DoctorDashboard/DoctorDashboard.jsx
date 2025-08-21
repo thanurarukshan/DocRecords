@@ -1,10 +1,11 @@
+// DoctorDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import './DoctorDashboard.css';
 import { useLocation } from "react-router-dom";
 
 function DoctorDashboard() {
   const location = useLocation();
-  const { user } = location.state || {}; // user object passed from Login page
+  const { user } = location.state || {}; // doctor object from login
 
   const [doctorProfile, setDoctorProfile] = useState({});
   const [patientId, setPatientId] = useState('');
@@ -14,7 +15,7 @@ function DoctorDashboard() {
 
   useEffect(() => {
     if (user) {
-      setDoctorProfile(user); // set doctor profile from login data
+      setDoctorProfile(user); // doctor info from login
     }
   }, [user]);
 
@@ -46,12 +47,13 @@ function DoctorDashboard() {
     if (!newPrescription || !patient) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/patient/patients/${patientId}/prescriptions`, {
+      const response = await fetch(`http://localhost:4000/prescription/add-prescription`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          patient_id: patient.user_id,       // from search result
+          doctor_id: doctorProfile.id,       // corrected field
           prescription: newPrescription,
-          doctor_name: doctorProfile.fullName || "Unknown Doctor",
         }),
       });
 
@@ -59,12 +61,12 @@ function DoctorDashboard() {
         throw new Error("Failed to save prescription");
       }
 
-      const updatedHistory = await response.json();
+      const savedConsultation = await response.json();
 
-      // Update patient with new history
+      // Update UI with the full medicalHistory returned by backend
       setPatient((prev) => ({
         ...prev,
-        medicalHistory: updatedHistory.medicalHistory,
+        medicalHistory: savedConsultation.medicalHistory,
       }));
 
       setNewPrescription('');
@@ -88,6 +90,7 @@ function DoctorDashboard() {
           <p><strong>Mobile:</strong> {doctorProfile.mobile || "-"}</p>
           <p><strong>Email:</strong> {doctorProfile.email || "-"}</p>
           <p><strong>MBBS Reg No:</strong> {doctorProfile.mbbsReg || "-"}</p>
+          <p><strong>User ID:</strong> {doctorProfile.id || "-"}</p>
         </div>
       </section>
 
@@ -113,6 +116,7 @@ function DoctorDashboard() {
           <p><strong>Full Name:</strong> {patient.full_name}</p>
           <p><strong>Age:</strong> {patient.age}</p>
           <p><strong>Gender:</strong> {patient.gender}</p>
+          <p><strong>Patient ID:</strong> {patient.user_id}</p>
 
           <h3>Medical History</h3>
           {patient.medicalHistory?.length > 0 ? (
@@ -126,7 +130,7 @@ function DoctorDashboard() {
               <tbody>
                 {patient.medicalHistory.map((record, index) => (
                   <tr key={index}>
-                    <td>{new Date(record.date).toLocaleDateString()}</td>
+                    <td>{new Date(record.visit_date).toLocaleDateString()}</td>
                     <td>{record.prescription}</td>
                   </tr>
                 ))}

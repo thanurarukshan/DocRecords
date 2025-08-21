@@ -1,24 +1,9 @@
-// const express = require("express");
-// const cors = require("cors");
-// require("dotenv").config();
-
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
-
-// // TODO: add routes
-// app.get("/", (req, res) => {
-//   res.send("Welcome to prescription-service API 🚀");
-// });
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log("prescription-service running on port " + PORT));
-
+// backend/prescription-service/src/server.js
 
 import express from "express";
 import cors from "cors";
-import pool from "./db.js"; // import DB pool
 import dotenv from "dotenv";
+import db from "./db.js"; // MySQL connection pool
 
 dotenv.config();
 
@@ -26,40 +11,82 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ----------------- ROUTES -----------------
-
-// Test route
+// ----------------- DEFAULT ROUTE -----------------
 app.get("/", (req, res) => {
-  res.send("Welcome to prescription-service API 🚀");
+  res.send("Welcome to Prescription Service 🚀");
 });
 
-// Get medical history for a patient by user_id
+// ----------------- GET MEDICAL HISTORY -----------------
+// Example: GET /medical-history/5 → all prescriptions for patient_id = 5
 app.get("/medical-history/:patientId", async (req, res) => {
   const { patientId } = req.params;
 
   try {
-    const [rows] = await pool.query(
-    `SELECT 
-        c.consultation_id, 
-        c.visit_date AS date,  -- updated column
-        c.prescription, 
-        d.full_name AS doctor_name
-    FROM patient_db.consultations c
-    JOIN auth_db.users d ON c.doctor_id = d.user_id
-    WHERE c.patient_id = ?
-    ORDER BY c.visit_date DESC`,
-    [patientId]
-);
+    const [rows] = await db.query(
+      `SELECT c.consultation_id, c.visit_date, c.prescription, d.full_name AS doctor_name
+       FROM consultations c
+       LEFT JOIN users d ON c.doctor_id = d.user_id
+       WHERE c.patient_id = ? 
+       ORDER BY c.visit_date DESC`,
+      [patientId]
+    );
 
+    if (rows.length === 0) {
+      return res.status(404).json({ medicalHistory: [] });
+    }
 
     res.json({ medicalHistory: rows });
-  } catch (err) {
-    console.error("Error fetching medical history:", err);
-    res.status(500).json({ message: "Database error" });
+  } catch (error) {
+    console.error("Error fetching medical history:", error);
+    res.status(500).json({ error: "Database query failed" });
   }
 });
 
+// ----------------- ADD NEW PRESCRIPTION -----------------
+// Example POST body:
+// {
+//   "patient_id": 5,
+//   "doctor_id": 2,
+//   "prescription": "Paracetamol 500mg, Vitamin C 500mg"
+// }
+app.post("/add-prescription", async (req, res) => {
+  const { patient_id, doctor_id, prescription } = req.body;
+
+  if (!patient_id || !doctor_id || !prescription) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    // Insert the new prescription
+    const [result] = await db.query(
+      `INSERT INTO consultations (patient_id, doctor_id, prescription) 
+       VALUES (?, ?, ?)`,
+      [patient_id, doctor_id, prescription]
+    );
+
+    // Fetch updated medical history for that patient
+    const [rows] = await db.query(
+      `SELECT consultation_id, visit_date, prescription, doctor_id
+      FROM consultations
+      WHERE patient_id = ?
+      ORDER BY visit_date DESC`,
+      [patient_id]
+    );
+
+
+    res.status(201).json({
+      message: "Prescription added successfully",
+      consultation_id: result.insertId,
+      medicalHistory: rows
+    });
+  } catch (error) {
+    console.error("Error inserting prescription:", error);
+    res.status(500).json({ error: "Database insert failed" });
+  }
+});
 
 // ----------------- START SERVER -----------------
 const PORT = process.env.PORT || 5004;
-app.listen(PORT, () => console.log("prescription-service running on port " + PORT));
+app.listen(PORT, () =>
+  console.log(`Prescription service running on port ${PORT}`)
+);
