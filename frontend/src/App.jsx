@@ -10,6 +10,8 @@ import AdminDashboard from './pages/AdminDashboard/AdminDashboard.jsx';
 import DoctorDashboard from './pages/DoctorDashboard/DoctorDashboard.jsx';
 import PatientDashboard from './pages/PatientDashboard/PatientDashboard.jsx';
 
+import bgImage from "./assets/bg.jpg"; // ✅ import background image
+
 // A wrapper to handle splash on route change
 function AppContent() {
   const location = useLocation();
@@ -25,12 +27,24 @@ function AppContent() {
   if (loading) return <SplashScreen />;
 
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/patient" element={<PatientDashboard />} />
-      <Route path="/doctor" element={<DoctorDashboard />} />
-    </Routes>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: "cover",       // ✅ scales to cover entire screen
+        backgroundPosition: "center",  // ✅ keeps centered on all screens
+        backgroundRepeat: "no-repeat",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/patient" element={<PatientDashboard />} />
+        <Route path="/doctor" element={<DoctorDashboard />} />
+      </Routes>
+    </div>
   );
 }
 
