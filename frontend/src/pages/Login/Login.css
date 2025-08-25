@@ -239,6 +239,20 @@
   color: #333;  
 }
 
+.contact-us {
+  width: 80vw;        /* default for vertical (portrait) */
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: block;
+  margin: 20px auto;
+  background-color: #ffffff;
+  margin-top: 10vh;
+  padding-top:10px;
+  padding-bottom: 60px;
+}
+
+
 /* When screen is in landscape (horizontal) */
 @media (orientation: landscape) {
   .landingImage {
@@ -250,6 +264,9 @@
   }
   .aboutus-para {
     max-width: 60vw;
+  }
+  .contact-us {
+    width: 60vw;
   }
 }
 

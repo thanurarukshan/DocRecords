@@ -125,11 +125,12 @@ At the heart of DocRecords lies a commitment to privacy and data protection. We 
 
 DocRecords is more than just a record-keeping tool it is a step toward the future of digital healthcare management. We are driven by innovation, guided by trust, and committed to making healthcare simpler, smarter, and more connected.</p>
         </section>
-
-        <section id="contact" className="contact-section">
-          <h2>Contact Us</h2>
-          <p className='contact-us-text'>22ug1-0529@sltc.ac.lk | <a className='portfolio' href='https://thanurarukshan.web.app/'>thanurarukshan.web.app</a> | +94779371866</p>
-        </section>
+        <div className='contact-us'>
+          <section id="contact" className="contact-section">
+            <h2>Contact Us</h2>
+            <p className='contact-us-text'>22ug1-0529@sltc.ac.lk | <a className='portfolio' href='https://thanurarukshan.web.app/'>thanurarukshan.web.app</a> | +94779371866</p>
+          </section>
+        </div>
       </main>
 
       {/* ---------- Login Modal ---------- */}
