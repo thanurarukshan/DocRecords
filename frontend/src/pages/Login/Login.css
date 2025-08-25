@@ -201,11 +201,55 @@
   margin: 20px auto;
 }
 
+.welcome-text {
+  font-size: 1.2rem;      /* slightly bigger text */
+  font-weight: 400;       /* reduce boldness (normal weight) */
+  max-width: 80vw;        /* restrict width to 80% of viewport */
+  margin: 20px auto;      /* center with spacing */
+  line-height: 1.6;       /* better readability */
+  color: #333;            /* softer black for professional look */
+  text-align: center;     /* center align for welcome note */
+}
+
+.aboutus-para {
+  font-size: 1.2rem;      /* slightly bigger text */
+  font-weight: 400;       /* reduce boldness (normal weight) */
+  max-width: 80vw;        /* restrict width to 80% of viewport */
+  margin: 20px auto;      /* center with spacing */
+  line-height: 1.6;       /* better readability */
+  color: #333;            /* softer black for professional look */
+  text-align: center;   
+}
+
+.portfolio {
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+  cursor: pointer;
+  font-weight: 400;       /* reduce boldness (normal weight) */
+  max-width: 80vw;        /* restrict width to 80% of viewport */
+  margin: 20px auto;      /* center with spacing */
+  line-height: 1.6;       /* better readability */
+  color: #333;            /* softer black for professional look */
+  text-align: center;   
+}
+
+.contact-us-text {
+  font-size: 1.4rem;
+  color: #333;  
+}
+
 /* When screen is in landscape (horizontal) */
 @media (orientation: landscape) {
   .landingImage {
     width: 60vw;   /* fixed width */
     height: auto;
+  }
+  .welcome-text {
+    max-width: 60vw;
+  }
+  .aboutus-para {
+    max-width: 60vw;
   }
 }
 

@@ -107,7 +107,7 @@ function Login() {
         <img src={landingImage} alt='Landing Image' className='landingImage'/>
         <section className="hero-section">
           <h1>Welcome to DocRecords</h1>
-          <p>Your medical records, secure and accessible anytime.</p>
+          <p className='welcome-text'>“Your trusted partner in managing healthcare information. With DocRecords, your medical records are not just stored, but kept secure, organized, and always within reach. Whether you are a doctor tracking patient history or a patient wanting easy access to your health journey, we make it simple, reliable, and accessible anytime, anywhere. Experience the future of healthcare records with confidence, knowing your information is safe and available whenever you need it.”</p>
           <button className="btn-primary" onClick={() => setShowLogin(true)}>
             Get Started
           </button>
@@ -115,12 +115,20 @@ function Login() {
 
         <section id="about" className="about-section">
           <h2>About Us</h2>
-          <p>DocRecords helps doctors and patients manage medical records seamlessly.</p>
+          <p className='aboutus-para'>At DocRecords, we believe that healthcare should be as seamless and efficient as possible not only for doctors and medical staff but also for patients who rely on accurate and accessible information. Our mission is to simplify the way medical records are created, stored, and shared, ensuring that both patients and healthcare professionals have secure, reliable access to the information they need, when they need it. <br/> <br/>
+
+Founded with a vision to bridge the gap between traditional medical record systems and modern digital solutions, DocRecords provides a platform that combines security, accessibility, and ease of use. We understand the challenges that come with managing healthcare data from lost files and fragmented records to the difficulty of accessing past medical histories. With DocRecords, those challenges become a thing of the past.<br/> <br/>
+
+Our platform is designed with patients and doctors in mind. Patients can take control of their health journey by accessing their complete records in one place, while doctors benefit from streamlined workflows, organized patient histories, and the ability to make better-informed medical decisions.<br/> <br/>
+
+At the heart of DocRecords lies a commitment to privacy and data protection. We employ advanced encryption and compliance practices to ensure that sensitive medical information remains safe at all times. Whether you are a healthcare provider managing hundreds of patients or an individual tracking your personal health, our solution ensures that your data is handled with the highest level of care.<br/> <br/>
+
+DocRecords is more than just a record-keeping tool it is a step toward the future of digital healthcare management. We are driven by innovation, guided by trust, and committed to making healthcare simpler, smarter, and more connected.</p>
         </section>
 
         <section id="contact" className="contact-section">
           <h2>Contact Us</h2>
-          <p>Email: support@docrecords.com | Phone: +94 77 123 4567</p>
+          <p className='contact-us-text'>22ug1-0529@sltc.ac.lk | <a className='portfolio' href='https://thanurarukshan.web.app/'>thanurarukshan.web.app</a> | +94779371866</p>
         </section>
       </main>
 
