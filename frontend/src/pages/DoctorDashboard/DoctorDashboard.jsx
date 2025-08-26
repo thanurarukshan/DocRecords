@@ -23,14 +23,84 @@ function DoctorDashboard() {
     if (user) {
       setDoctorProfile(user);
       setEditForm({
-        fullName: user.fullName,
-        age: user.age,
-        birthday: user.birthday,
-        mobile: user.mobile,
-        email: user.email,
+        fullName: user.fullName || "",
+        age: user.age || "",
+        birthday: user.birthday ? user.birthday.split("T")[0] : "",
+        mobile: user.mobile || "",
+        email: user.email || "",
+        gender: user.gender || "",
+        mbbsReg: user.mbbsReg || "",
       });
     }
   }, [user]);
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm({ ...editForm, [name]: value });
+  };
+
+  const handleEditSave = async () => {
+    try {
+      if (!editForm.fullName) {
+        alert("Full Name is required!");
+        return;
+      }
+
+      const payload = {
+        email: editForm.email || "",
+        full_name: editForm.fullName,
+        age: editForm.age || null,
+        gender: editForm.gender || null,
+        birthday: editForm.birthday || null,
+        mobile: editForm.mobile || "",
+        mbbs_reg: editForm.mbbsReg || null,
+      };
+
+      const response = await fetch(`http://localhost:4000/profile/users/${doctorProfile.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setDoctorProfile({ ...doctorProfile, ...editForm });
+        setEditModalOpen(false);
+        alert("Profile updated successfully!");
+      } else {
+        alert("Failed to update profile: " + data.message);
+      }
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      alert("An error occurred while updating profile.");
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/profile/users/${doctorProfile.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Profile deleted successfully!");
+        window.location.href = "http://localhost:5173";
+      } else {
+        const data = await response.json();
+        alert("Failed to delete profile: " + data.message);
+      }
+    } catch (err) {
+      console.error("Error deleting profile:", err);
+      alert("An error occurred while deleting profile.");
+    } finally {
+      setDeleteModalOpen(false);
+    }
+  };
+
+  const handleLogoutConfirm = () => {
+    window.location.href = "http://localhost:5173";
+  };
 
   // Fetch patient info by ID
   const handleSearch = async (e) => {
@@ -90,24 +160,6 @@ function DoctorDashboard() {
     }
   };
 
-  const handleLogoutConfirm = () => {
-    window.location.href = "http://localhost:5173";
-  };
-
-  const handleEditChange = (e) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-
-  const handleEditSave = () => {
-    setDoctorProfile({ ...doctorProfile, ...editForm });
-    setEditModalOpen(false);
-  };
-
-  const handleDeleteConfirm = () => {
-    console.log("Delete confirmed for doctor:", doctorProfile.id);
-    setDeleteModalOpen(false);
-  };
-
   return (
     <div className="doctor-dashboard">
       <h2>Welcome, {doctorProfile.fullName || "Doctor"}</h2>
@@ -134,6 +186,7 @@ function DoctorDashboard() {
         </div>
       </section>
 
+      {/* Patient search and info */}
       <section className="search-section">
         <h3>Search Patient</h3>
         <form onSubmit={handleSearch}>
@@ -207,9 +260,11 @@ function DoctorDashboard() {
             <h3>Edit Profile</h3>
             <input type="text" name="fullName" value={editForm.fullName} onChange={handleEditChange} placeholder="Full Name" />
             <input type="number" name="age" value={editForm.age} onChange={handleEditChange} placeholder="Age" />
-            <input type="date" name="birthday" value={editForm.birthday ? editForm.birthday.split("T")[0] : ""} onChange={handleEditChange} />
+            <input type="date" name="birthday" value={editForm.birthday} onChange={handleEditChange} />
             <input type="text" name="mobile" value={editForm.mobile} onChange={handleEditChange} placeholder="Mobile" />
             <input type="email" name="email" value={editForm.email} onChange={handleEditChange} placeholder="Email" />
+            <input type="text" name="gender" value={editForm.gender} onChange={handleEditChange} placeholder="Gender (optional)" />
+            <input type="text" name="mbbsReg" value={editForm.mbbsReg} onChange={handleEditChange} placeholder="MBBS Reg No (optional)" />
             <div className="modal-actions">
               <button className="save-btn" onClick={handleEditSave}>Save</button>
               <button className="cancel-btn" onClick={() => setEditModalOpen(false)}>Cancel</button>
