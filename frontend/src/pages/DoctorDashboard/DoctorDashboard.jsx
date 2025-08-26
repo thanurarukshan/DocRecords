@@ -13,27 +13,36 @@ function DoctorDashboard() {
   const [newPrescription, setNewPrescription] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [isAddPrescriptionModalOpen, setAddPrescriptionModalOpen] = useState(false);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({});
+
   useEffect(() => {
     if (user) {
-      setDoctorProfile(user); // doctor info from login
+      setDoctorProfile(user);
+      setEditForm({
+        fullName: user.fullName,
+        age: user.age,
+        birthday: user.birthday,
+        mobile: user.mobile,
+        email: user.email,
+      });
     }
   }, [user]);
 
-  // 🔍 Fetch patient info AND medical history by ID
+  // Fetch patient info by ID
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!patientId) return;
 
     setLoading(true);
     try {
-      // Fetch patient profile
       const patientRes = await fetch(`http://localhost:4000/patient/patients/${patientId}`);
-      if (!patientRes.ok) {
-        throw new Error("Patient not found");
-      }
+      if (!patientRes.ok) throw new Error("Patient not found");
       const patientData = await patientRes.json();
 
-      // Fetch patient's medical history from prescription-service via API Gateway
       const historyRes = await fetch(`http://localhost:4000/prescription/medical-history/${patientId}`);
       let medicalHistory = [];
       if (historyRes.ok) {
@@ -43,7 +52,7 @@ function DoctorDashboard() {
 
       setPatient({ ...patientData, medicalHistory });
     } catch (error) {
-      console.error("Error fetching patient:", error);
+      console.error(error);
       setPatient(null);
       alert('Patient not found!');
     } finally {
@@ -51,9 +60,7 @@ function DoctorDashboard() {
     }
   };
 
-  // 💊 Add prescription
-  const handleAddPrescription = async (e) => {
-    e.preventDefault();
+  const handleAddPrescription = async () => {
     if (!newPrescription || !patient) return;
 
     try {
@@ -61,29 +68,44 @@ function DoctorDashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          patient_id: patient.user_id,       // from search result
-          doctor_id: doctorProfile.id,       // from login
+          patient_id: patient.user_id,
+          doctor_id: doctorProfile.id,
           prescription: newPrescription,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to save prescription");
-      }
-
+      if (!response.ok) throw new Error("Failed to save prescription");
       const savedConsultation = await response.json();
 
-      // Update UI with the latest medicalHistory from backend
       setPatient((prev) => ({
         ...prev,
         medicalHistory: savedConsultation.medicalHistory,
       }));
 
       setNewPrescription('');
+      setAddPrescriptionModalOpen(false);
     } catch (error) {
-      console.error("Error adding prescription:", error);
+      console.error(error);
       alert("Failed to add prescription");
     }
+  };
+
+  const handleLogoutConfirm = () => {
+    window.location.href = "http://localhost:5173";
+  };
+
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSave = () => {
+    setDoctorProfile({ ...doctorProfile, ...editForm });
+    setEditModalOpen(false);
+  };
+
+  const handleDeleteConfirm = () => {
+    console.log("Delete confirmed for doctor:", doctorProfile.id);
+    setDeleteModalOpen(false);
   };
 
   return (
@@ -92,15 +114,23 @@ function DoctorDashboard() {
 
       <section className="profile-section">
         <h3>Your Profile</h3>
-        <div className="profile-info">
-          <p><strong>User ID:</strong> {doctorProfile.id || "-"}</p>
-          <p><strong>Full Name:</strong> {doctorProfile.fullName || "-"}</p>
-          <p><strong>Age:</strong> {doctorProfile.age || "-"}</p>
-          <p><strong>Gender:</strong> {doctorProfile.gender || "-"}</p>
-          <p><strong>Birthday:</strong> {doctorProfile.birthday || "-"}</p>
-          <p><strong>Mobile:</strong> {doctorProfile.mobile || "-"}</p>
-          <p><strong>Email:</strong> {doctorProfile.email || "-"}</p>
-          <p><strong>MBBS Reg No:</strong> {doctorProfile.mbbsReg || "-"}</p>
+        <div className="profile-card">
+          <div className="profile-grid">
+            <p><strong>User ID:</strong> {doctorProfile.id || "-"}</p>
+            <p><strong>Full Name:</strong> {doctorProfile.fullName || "-"}</p>
+            <p><strong>Age:</strong> {doctorProfile.age || "-"}</p>
+            <p><strong>Gender:</strong> {doctorProfile.gender || "-"}</p>
+            <p><strong>Birthday:</strong> {doctorProfile.birthday ? new Date(doctorProfile.birthday).toLocaleDateString() : "-"}</p>
+            <p><strong>Mobile:</strong> {doctorProfile.mobile || "-"}</p>
+            <p><strong>Email:</strong> {doctorProfile.email || "-"}</p>
+            <p><strong>MBBS Reg No:</strong> {doctorProfile.mbbsReg || "-"}</p>
+          </div>
+        </div>
+
+        <div className="profile-actions">
+          <button className="edit-btn" onClick={() => setEditModalOpen(true)}>Edit Profile</button>
+          <button className="delete-btn" onClick={() => setDeleteModalOpen(true)}>Delete Profile</button>
+          <button className="logout-btn" onClick={() => setLogoutModalOpen(true)}>Logout</button>
         </div>
       </section>
 
@@ -123,44 +153,95 @@ function DoctorDashboard() {
       {patient && (
         <section className="patient-section">
           <h3>Patient Info</h3>
-          <p><strong>Full Name:</strong> {patient.full_name}</p>
-          <p><strong>Age:</strong> {patient.age}</p>
-          <p><strong>Gender:</strong> {patient.gender}</p>
-          <p><strong>Patient ID:</strong> {patient.user_id}</p>
+          <div className="patient-card">
+            <div className="profile-grid">
+              <p><strong>Full Name:</strong> {patient.full_name}</p>
+              <p><strong>Age:</strong> {patient.age}</p>
+              <p><strong>Gender:</strong> {patient.gender}</p>
+              <p><strong>Patient ID:</strong> {patient.user_id}</p>
+            </div>
+            <div className="patient-actions">
+              <button className="add-prescription-btn" onClick={() => setAddPrescriptionModalOpen(true)}>Add Prescription</button>
+            </div>
+          </div>
 
           <h3>Medical History</h3>
-          {patient.medicalHistory?.length > 0 ? (
-            <table className="history-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Prescription</th>
-                </tr>
-              </thead>
-              <tbody>
-                {patient.medicalHistory.map((record, index) => (
-                  <tr key={index}>
-                    <td>{new Date(record.visit_date).toLocaleDateString()}</td>
-                    <td>{record.prescription}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>No medical history available.</p>
-          )}
+          <div className="history-cards">
+            {patient.medicalHistory?.length > 0 ? (
+              patient.medicalHistory.map((record, index) => (
+                <div key={index} className="history-card">
+                  <p><strong>Date:</strong> {new Date(record.visit_date).toLocaleDateString()}</p>
+                  <p><strong>Prescription:</strong> {record.prescription}</p>
+                </div>
+              ))
+            ) : (
+              <p>No medical history available.</p>
+            )}
+          </div>
+        </section>
+      )}
 
-          <h3>Add Prescription</h3>
-          <form onSubmit={handleAddPrescription}>
+      {/* Add Prescription Modal */}
+      {isAddPrescriptionModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Add Prescription</h3>
             <textarea
               placeholder="Enter prescription details"
               value={newPrescription}
               onChange={(e) => setNewPrescription(e.target.value)}
-              required
-            ></textarea>
-            <button type="submit" className="btn-primary">Add Prescription</button>
-          </form>
-        </section>
+              rows={5}
+            />
+            <div className="modal-actions">
+              <button className="save-btn" onClick={handleAddPrescription}>Save</button>
+              <button className="cancel-btn" onClick={() => setAddPrescriptionModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {isEditModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Edit Profile</h3>
+            <input type="text" name="fullName" value={editForm.fullName} onChange={handleEditChange} placeholder="Full Name" />
+            <input type="number" name="age" value={editForm.age} onChange={handleEditChange} placeholder="Age" />
+            <input type="date" name="birthday" value={editForm.birthday ? editForm.birthday.split("T")[0] : ""} onChange={handleEditChange} />
+            <input type="text" name="mobile" value={editForm.mobile} onChange={handleEditChange} placeholder="Mobile" />
+            <input type="email" name="email" value={editForm.email} onChange={handleEditChange} placeholder="Email" />
+            <div className="modal-actions">
+              <button className="save-btn" onClick={handleEditSave}>Save</button>
+              <button className="cancel-btn" onClick={() => setEditModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Are you sure you want to delete your profile?</h3>
+            <div className="modal-actions">
+              <button className="delete-btn" onClick={handleDeleteConfirm}>Yes, Delete</button>
+              <button className="cancel-btn" onClick={() => setDeleteModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {isLogoutModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Are you sure you want to logout?</h3>
+            <div className="modal-actions">
+              <button className="logout-btn" onClick={handleLogoutConfirm}>Yes, Logout</button>
+              <button className="cancel-btn" onClick={() => setLogoutModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
