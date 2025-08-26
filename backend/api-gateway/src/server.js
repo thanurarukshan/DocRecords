@@ -1,22 +1,3 @@
-// const express = require("express");
-// const cors = require("cors");
-// require("dotenv").config();
-
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
-
-// // TODO: add routes
-// app.get("/", (req, res) => {
-//   res.send("Welcome to api-gateway API 🚀");
-// });
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log("api-gateway running on port " + PORT));
-
-
-// backend/api-gateway/src/server.js
-
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 
@@ -26,7 +7,7 @@ const app = express();
 app.use(
   "/auth",
   createProxyMiddleware({
-    target: "http://localhost:5001",  // auth-service
+    target: "http://localhost:5001", // auth-service
     changeOrigin: true,
   })
 );
@@ -35,9 +16,9 @@ app.use(
 app.use(
   "/patient",
   createProxyMiddleware({
-    target: "http://localhost:5000",  // patient-service (corrected)
+    target: "http://localhost:5000", // patient-service
     changeOrigin: true,
-    pathRewrite: { "^/patient": "" }
+    pathRewrite: { "^/patient": "" },
   })
 );
 
@@ -45,9 +26,9 @@ app.use(
 app.use(
   "/doctor",
   createProxyMiddleware({
-    target: "http://localhost:5003",  // doctor-service
+    target: "http://localhost:5003", // doctor-service
     changeOrigin: true,
-    pathRewrite: { "^/doctor": "" }
+    pathRewrite: { "^/doctor": "" },
   })
 );
 
@@ -55,9 +36,9 @@ app.use(
 app.use(
   "/appointment",
   createProxyMiddleware({
-    target: "http://localhost:5004",  // appointment-service
+    target: "http://localhost:5004", // appointment-service
     changeOrigin: true,
-    pathRewrite: { "^/appointment": "" }
+    pathRewrite: { "^/appointment": "" },
   })
 );
 
@@ -65,9 +46,19 @@ app.use(
 app.use(
   "/prescription",
   createProxyMiddleware({
-    target: "http://localhost:5004",  // prescription-service
+    target: "http://localhost:5004", // prescription-service
     changeOrigin: true,
-    pathRewrite: { "^/prescription": "" }  // /prescription/medical-history/:id → /medical-history/:id
+    pathRewrite: { "^/prescription": "" }, // /prescription/... → /...
+  })
+);
+
+// ---------- PROFILE CONTROL SERVICE ----------
+app.use(
+  "/profile",
+  createProxyMiddleware({
+    target: "http://localhost:5008", // profile-control-service
+    changeOrigin: true,
+    pathRewrite: { "^/profile": "" }, // /profile/update → /update
   })
 );
 

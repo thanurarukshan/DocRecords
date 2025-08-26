@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of your microservices
-services=("auth-service" "doctor-service" "patient-service" "admin-service" "api-gateway" "prescription-service")
+services=("profile-control-service")
 
 # Common dependencies
 common_deps="express mysql2 dotenv cors"
