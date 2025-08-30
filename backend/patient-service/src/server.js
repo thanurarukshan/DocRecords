@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import pool from "./db.js";  // using your db.js connection pool
+import pool from "./db.js";
 
 dotenv.config();
 
@@ -28,14 +28,18 @@ app.get("/patients/:id", async (req, res) => {
       return res.status(404).json({ message: "Patient not found" });
     }
 
-    res.json(rows[0]); // return first matching patient
+    res.json(rows[0]);
   } catch (error) {
     console.error("Error fetching patient:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`patient-service running on port ${PORT}`)
-);
+if (process.env.NODE_ENV !== "test") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () =>
+    console.log(`patient-service running on port ${PORT}`)
+  );
+}
+
+export default app;  // for testing purposes
