@@ -6,7 +6,6 @@ import SplashScreen from '../SplashScreen.jsx';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 import Login from './pages/Login/Login.jsx';
-import AdminDashboard from './pages/AdminDashboard/AdminDashboard.jsx';
 import DoctorDashboard from './pages/DoctorDashboard/DoctorDashboard.jsx';
 import PatientDashboard from './pages/PatientDashboard/PatientDashboard.jsx';
 
@@ -40,7 +39,6 @@ function AppContent() {
     >
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/patient" element={<PatientDashboard />} />
         <Route path="/doctor" element={<DoctorDashboard />} />
       </Routes>
