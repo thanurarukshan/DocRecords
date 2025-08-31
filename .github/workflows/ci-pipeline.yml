@@ -47,9 +47,10 @@ jobs:
       - name: Start Frontend
         run: |
           cd frontend
-          nohup npm start > frontend/frontend.log 2>&1 &
+          # Make log file in current folder
+          nohup npm run dev -- --host 0.0.0.0 > frontend.log 2>&1 &
           cd ..
-          sleep 30
+          sleep 20
 
       # # Health checks for backend + frontend
       # - name: Check API Gateway
