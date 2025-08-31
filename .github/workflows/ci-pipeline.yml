@@ -69,19 +69,19 @@ jobs:
 
       # Health checks for backend + frontend
       - name: Check API Gateway
-        run: curl -f http://localhost:5000
+        run: curl -f http://localhost:4000
 
       - name: Check Auth Service
         run: curl -f http://localhost:5001
 
       - name: Check Patient Service
-        run: curl -f http://localhost:5002
+        run: curl -f http://localhost:5000
 
       - name: Check Prescription Service
-        run: curl -f http://localhost:5003
-
-      - name: Check Profile Control Service
         run: curl -f http://localhost:5004
 
+      - name: Check Profile Control Service
+        run: curl -f http://localhost:5008
+
       - name: Check Frontend
-        run: curl -f http://localhost:3000
+        run: curl -f http://localhost:5173
