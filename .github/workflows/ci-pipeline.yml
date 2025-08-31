@@ -49,7 +49,7 @@ jobs:
           cd frontend
           nohup npm start > frontend/frontend.log 2>&1 &
           cd ..
-          sleep 20
+          sleep 30
 
       # # Health checks for backend + frontend
       # - name: Check API Gateway
