@@ -51,21 +51,40 @@ jobs:
           cd ..
           sleep 20
 
-      # Health checks for backend + frontend
+      # # Health checks for backend + frontend
+      # - name: Check API Gateway
+      #   run: curl -f http://localhost:4000
+
+      # - name: Check Auth Service
+      #   run: curl -f http://localhost:5001
+
+      # - name: Check Patient Service
+      #   run: curl -f http://localhost:5000
+
+      # - name: Check Prescription Service
+      #   run: curl -f http://localhost:5004
+
+      # - name: Check Profile Control Service
+      #   run: curl -f http://localhost:5008
+
+      # - name: Check Frontend
+      #   run: curl -f http://localhost:5173
+
+      # Health checks for backend + frontend using nc
       - name: Check API Gateway
-        run: curl -f http://localhost:4000
+        run: nc -zv localhost 4000
 
       - name: Check Auth Service
-        run: curl -f http://localhost:5001
+        run: nc -zv localhost 5001
 
       - name: Check Patient Service
-        run: curl -f http://localhost:5000
+        run: nc -zv localhost 5000
 
       - name: Check Prescription Service
-        run: curl -f http://localhost:5004
+        run: nc -zv localhost 5004
 
       - name: Check Profile Control Service
-        run: curl -f http://localhost:5008
+        run: nc -zv localhost 5008
 
       - name: Check Frontend
-        run: curl -f http://localhost:5173
+        run: nc -zv localhost 5173
