@@ -13,59 +13,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install Node.js (for backend + frontend)
+      # Install Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # Install dependencies for backend microservices
-      - name: Install backend dependencies
+      # Install dependencies for backend + frontend
+      - name: Install all dependencies
         run: |
           cd backend/api-gateway && npm install && cd -
           cd backend/auth-service && npm install && cd -
           cd backend/patient-service && npm install && cd -
           cd backend/prescription-service && npm install && cd -
           cd backend/profile-control-service && npm install && cd -
-
-      # Install dependencies for frontend
-      - name: Install frontend dependencies
-        run: |
           cd frontend && npm install && cd -
 
-      # Start backend services one by one
-      - name: Start Auth Service
+      # Start all services using npm run dev
+      - name: Start all services
         run: |
-          nohup node backend/auth-service/src/server.js > backend/auth-service/auth.log 2>&1 &
-          sleep 10
-
-      - name: Start Patient Service
-        run: |
-          nohup node backend/patient-service/src/server.js > backend/patient-service/patient.log 2>&1 &
-          sleep 10
-
-      - name: Start Prescription Service
-        run: |
-          nohup node backend/prescription-service/src/server.js > backend/prescription-service/prescription.log 2>&1 &
-          sleep 10
-
-      - name: Start Profile Control Service
-        run: |
-          nohup node backend/profile-control-service/src/server.js > backend/profile-control-service/profile.log 2>&1 &
-          sleep 10
-
-      - name: Start API Gateway
-        run: |
-          nohup node backend/api-gateway/src/server.js > backend/api-gateway/gateway.log 2>&1 &
-          sleep 10
-
-      # Start frontend service
-      - name: Start Frontend
-        run: |
-          cd frontend
-          nohup npm start > frontend/frontend.log 2>&1 &
-          cd ..
-          sleep 20
+          nohup npm run dev > dev.log 2>&1 &
+          sleep 30  # wait for all services to start
 
       # Health checks for backend + frontend
       - name: Check API Gateway
