@@ -28,23 +28,39 @@ jobs:
           cd backend/prescription-service && npm install && cd -
           cd backend/profile-control-service && npm install && cd -
 
-      # Install dependencies for frontend (React/Next.js/etc.)
+      # Install dependencies for frontend
       - name: Install frontend dependencies
         run: |
           cd frontend && npm install && cd -
 
-      # Start backend services
-      - name: Start backend services
+      # Start backend services one by one
+      - name: Start Auth Service
         run: |
           nohup node backend/auth-service/src/server.js > backend/auth-service/auth.log 2>&1 &
+          sleep 10
+
+      - name: Start Patient Service
+        run: |
           nohup node backend/patient-service/src/server.js > backend/patient-service/patient.log 2>&1 &
+          sleep 10
+
+      - name: Start Prescription Service
+        run: |
           nohup node backend/prescription-service/src/server.js > backend/prescription-service/prescription.log 2>&1 &
+          sleep 10
+
+      - name: Start Profile Control Service
+        run: |
           nohup node backend/profile-control-service/src/server.js > backend/profile-control-service/profile.log 2>&1 &
+          sleep 10
+
+      - name: Start API Gateway
+        run: |
           nohup node backend/api-gateway/src/server.js > backend/api-gateway/gateway.log 2>&1 &
-          sleep 20
+          sleep 10
 
       # Start frontend service
-      - name: Start frontend
+      - name: Start Frontend
         run: |
           cd frontend
           nohup npm start > frontend/frontend.log 2>&1 &
@@ -52,12 +68,20 @@ jobs:
           sleep 20
 
       # Health checks for backend + frontend
-      - name: Verify services are running
-        run: |
-          set -e
-          echo "Checking API Gateway..." && curl -f http://localhost:5000 || (cat backend/api-gateway/*.log && exit 1)
-          echo "Checking Auth Service..." && curl -f http://localhost:5001 || (cat backend/auth-service/*.log && exit 1)
-          echo "Checking Patient Service..." && curl -f http://localhost:5002 || (cat backend/patient-service/*.log && exit 1)
-          echo "Checking Prescription Service..." && curl -f http://localhost:5003 || (cat backend/prescription-service/*.log && exit 1)
-          echo "Checking Profile Control Service..." && curl -f http://localhost:5004 || (cat backend/profile-control-service/*.log && exit 1)
-          echo "Checking Frontend..." && curl -f http://localhost:3000 || (cat frontend/*.log && exit 1)
+      - name: Check API Gateway
+        run: curl -f http://localhost:5000
+
+      - name: Check Auth Service
+        run: curl -f http://localhost:5001
+
+      - name: Check Patient Service
+        run: curl -f http://localhost:5002
+
+      - name: Check Prescription Service
+        run: curl -f http://localhost:5003
+
+      - name: Check Profile Control Service
+        run: curl -f http://localhost:5004
+
+      - name: Check Frontend
+        run: curl -f http://localhost:3000
