@@ -1,0 +1,82 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main   # or your branch name
+
+jobs:
+  build-test-validate:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Install Node.js (for services + Newman)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Install dependencies for each microservice
+      - name: Install backend dependencies
+        run: |
+          cd backend/api-gateway && npm install && cd -
+          cd backend/auth-service && npm install && cd -
+          cd backend/patient-service && npm install && cd -
+          cd backend/prescription-service && npm install && cd -
+          cd backend/profile-control-service && npm install && cd -
+
+      # Build and start all backend services
+      - name: Start backend services
+        run: |
+          # Option A: If you have docker-compose.yml, just use:
+          # docker-compose up -d --build
+          
+          # Option B: Start services manually (example for API Gateway):
+          nohup node backend/auth-service/src/server.js &
+          nohup node backend/patient-service/src/server.js &
+          nohup node backend/prescription-service/src/server.js &
+          nohup node backend/profile-control-service/src/server.js &
+          nohup node backend/api-gateway/src/server.js &
+
+          # Give services some time to boot
+          sleep 20
+
+      # Import database (using your restore script)
+      - name: Restore database
+        run: |
+          chmod +x database/db_create.sh
+          ./database/db_create.sh root root
+
+      # Install Newman CLI
+      - name: Install Newman
+        run: npm install -g newman
+
+      # Run Postman Collection Tests
+      - name: Run E2E Postman Tests
+        run: |
+          newman run DocRecords_E2E_postman_collection.json \
+            --reporters cli,junit \
+            --reporter-junit-export newman-results.xml
+
+      # Upload test results as artifact (optional)
+      - name: Upload Newman Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: newman-report
+          path: newman-results.xml
